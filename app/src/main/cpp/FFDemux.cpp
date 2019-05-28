@@ -34,6 +34,18 @@ bool FFDemux::Open(const char *url) {
 
 XData FFDemux::Read() {
     XData xData;
+    if (!ic) {
+        return xData;
+    }
+    AVPacket *pkt = av_packet_alloc();
+    int re = av_read_frame(ic, pkt);
+    if (re != 0) {
+        av_packet_free(&pkt);
+        return xData;
+    }
+    XLOGI("pack siez %d,pts %lld", pkt->size, pkt->pts);
+    xData.data = reinterpret_cast<unsigned char *>(pkt);
+    xData.size = pkt->size;
     return xData;
 }
 
