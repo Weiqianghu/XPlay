@@ -9,11 +9,18 @@
 #include "IDemux.h"
 #include "XLog.h"
 
+struct AVFormatContext;
+
 class FFDemux : public IDemux {
 public:
     virtual bool Open(const char *url);
 
     virtual XData Read();
+
+    FFDemux();
+
+private:
+    AVFormatContext *ic = 0;
 };
 
 
