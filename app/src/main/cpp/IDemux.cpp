@@ -3,3 +3,13 @@
 //
 
 #include "IDemux.h"
+#include "XLog.h"
+
+void IDemux::Main() {
+    while (!isExit) {
+        XData data = Read();
+        if (data.size > 0) {
+            XLOGI("IDemux read %d", data.size);
+        }
+    }
+}

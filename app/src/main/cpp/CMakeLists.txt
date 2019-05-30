@@ -38,6 +38,7 @@ add_library( # Sets the name of the library.
         FFDemux.cpp
         XLog.cpp
         XData.cpp
+        XThread.cpp
         )
 
 # Searches for a specified prebuilt library and stores the path as a
