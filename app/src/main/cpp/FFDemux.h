@@ -15,6 +15,8 @@ class FFDemux : public IDemux {
 public:
     virtual bool Open(const char *url);
 
+    virtual XParameter GetVParameter();
+
     virtual XData Read();
 
     FFDemux();

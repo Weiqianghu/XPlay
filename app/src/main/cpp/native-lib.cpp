@@ -1,6 +1,8 @@
 #include <jni.h>
 #include <string>
 #include "FFDemux.h"
+#include "IDecode.h"
+#include "FFDecode.h"
 
 class TestObserver : public IObserver {
 public:
@@ -20,6 +22,10 @@ Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
     IDemux *demux = new FFDemux();
     demux->AddObs(testObserver);
     demux->Open("sdcard/1080.mp4");
+
+    IDecode *decode = new FFDecode();
+    decode->Open(demux->GetVParameter());
+
     demux->Start();
     XSleep(3000);
     demux->Stop();

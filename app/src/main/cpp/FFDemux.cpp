@@ -59,3 +59,20 @@ FFDemux::FFDemux() {
         XLOGD("register ffmpeg success");
     }
 }
+
+XParameter FFDemux::GetVParameter() {
+    if (!ic) {
+        XLOGE("GetVParameter ic is null");
+        return XParameter();
+    }
+
+    int re = av_find_best_stream(ic, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
+    if (re < 0) {
+        XLOGE("av_find_best_stream failed");
+        return XParameter();
+    }
+
+    XParameter parameter;
+    parameter.para = ic->streams[re]->codecpar;
+    return parameter;
+}
