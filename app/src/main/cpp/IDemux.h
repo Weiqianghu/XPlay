@@ -18,6 +18,8 @@ public:
 
     virtual XParameter GetVParameter() = 0;
 
+    virtual XParameter GetAParameter() = 0;
+
     virtual XData Read() = 0;
 
     int64_t totalMs = 0;

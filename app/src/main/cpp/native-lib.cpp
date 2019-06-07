@@ -4,10 +4,9 @@
 #include "IDecode.h"
 #include "FFDecode.h"
 
-class TestObserver : public IObserver {
-public:
-    void Update(XData xData) {
-        XLOGI("TestObserver update size is %d", xData.size);
+class DecodeObserver : public IObserver {
+    virtual void Update(XData frame) {
+        XLOGI("frame size is : %d", frame.size);
     }
 };
 
@@ -17,17 +16,24 @@ Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
         jobject /* this */) {
     std::string hello = "Hello from C++";
 
-    TestObserver *testObserver = new TestObserver();
+    DecodeObserver *decodeObserver = new DecodeObserver();
 
     IDemux *demux = new FFDemux();
-    demux->AddObs(testObserver);
     demux->Open("sdcard/1080.mp4");
 
-    IDecode *decode = new FFDecode();
-    decode->Open(demux->GetVParameter());
+    IDecode *vdecode = new FFDecode();
+    vdecode->Open(demux->GetVParameter());
+    vdecode->AddObs(decodeObserver);
+    demux->AddObs(vdecode);
+
+    IDecode *adecode = new FFDecode();
+    adecode->Open(demux->GetAParameter());
+    adecode->AddObs(decodeObserver);
+    demux->AddObs(adecode);
 
     demux->Start();
-    XSleep(3000);
-    demux->Stop();
+    vdecode->Start();
+    adecode->Start();
+
     return env->NewStringUTF(hello.c_str());
 }

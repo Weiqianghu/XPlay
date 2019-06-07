@@ -10,7 +10,6 @@ void IDemux::Main() {
         XData data = Read();
         if (data.size > 0) {
             Notify(data);
-            XLOGI("IDemux read %d", data.size);
         }
     }
 }

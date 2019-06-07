@@ -17,12 +17,16 @@ public:
 
     virtual XParameter GetVParameter();
 
+    virtual XParameter GetAParameter();
+
     virtual XData Read();
 
     FFDemux();
 
 private:
     AVFormatContext *ic = 0;
+    int audioStream = 1;
+    int videoStream = 0;
 };
 
 
