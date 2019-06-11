@@ -46,6 +46,7 @@ XData FFDemux::Read() {
         av_packet_free(&pkt);
         return xData;
     }
+
     xData.data = reinterpret_cast<unsigned char *>(pkt);
     xData.size = pkt->size;
     if (pkt->stream_index == audioStream) {

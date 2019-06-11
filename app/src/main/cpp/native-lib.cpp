@@ -3,6 +3,8 @@
 #include "FFDemux.h"
 #include "IDecode.h"
 #include "FFDecode.h"
+#include "XEGL.h"
+#include <android/native_window_jni.h>
 
 class DecodeObserver : public IObserver {
     virtual void Update(XData frame) {
@@ -36,4 +38,10 @@ Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
     adecode->Start();
 
     return env->NewStringUTF(hello.c_str());
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_weiqianghu_xplay_XPlay_initView(JNIEnv *env, jobject instance, jobject surface) {
+    ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
+    XEGL::Get()->Init(win);
 }
