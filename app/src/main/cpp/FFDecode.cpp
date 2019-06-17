@@ -66,10 +66,12 @@ XData FFDecode::RecvFrame() {
     data.data = (unsigned char *) frame;
     if (codec->codec_type == AVMEDIA_TYPE_VIDEO) {
         data.size = (frame->linesize[0] + frame->linesize[1] + frame->linesize[2]) * frame->height;
+        data.width = frame->width;
+        data.height = frame->height;
     } else if (codec->codec_type == AVMEDIA_TYPE_AUDIO) {
         data.size = av_get_bytes_per_sample((AVSampleFormat) frame->format) * frame->nb_samples *
                     frame->channels;
     }
-
+    memcpy(data.datas, frame->data, sizeof(data.datas));
     return data;
 }

@@ -5,6 +5,8 @@
 #include "FFDecode.h"
 #include "XEGL.h"
 #include "XShader.h"
+#include "IVideoView.h"
+#include "GLVideoView.h"
 #include <android/native_window_jni.h>
 
 class DecodeObserver : public IObserver {
@@ -12,6 +14,8 @@ class DecodeObserver : public IObserver {
         XLOGI("frame size is : %d", frame.size);
     }
 };
+
+IVideoView *view = nullptr;
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
@@ -34,6 +38,9 @@ Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
     adecode->AddObs(decodeObserver);
     demux->AddObs(adecode);
 
+    view = new GLVideoView();
+    vdecode->AddObs(view);
+
     demux->Start();
     vdecode->Start();
     adecode->Start();
@@ -44,7 +51,5 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_weiqianghu_xplay_XPlay_initView(JNIEnv *env, jobject instance, jobject surface) {
     ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
-    XEGL::Get()->Init(win);
-    XShader shader;
-    shader.Init();
+    view->SetRender(win);
 }
