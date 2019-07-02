@@ -8,6 +8,8 @@
 #include "IVideoView.h"
 #include "GLVideoView.h"
 #include "FFResample.h"
+#include "IAudioPlay.h"
+#include "SLAudioPlay.h"
 #include <android/native_window_jni.h>
 
 class DecodeObserver : public IObserver {
@@ -43,8 +45,13 @@ Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
     vdecode->AddObs(view);
 
     IResample *resample = new FFResample();
-    resample->Open(demux->GetAParameter());
+    XParameter outPara = demux->GetAParameter();
+    resample->Open(demux->GetAParameter(), outPara);
     adecode->AddObs(resample);
+
+    IAudioPlay *audioPlay = new SLAudioPlay();
+    audioPlay->StartPlay(outPara);
+    resample->AddObs(audioPlay);
 
     demux->Start();
     vdecode->Start();

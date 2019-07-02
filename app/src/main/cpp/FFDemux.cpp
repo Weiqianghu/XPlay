@@ -104,5 +104,8 @@ XParameter FFDemux::GetAParameter() {
 
     XParameter parameter;
     parameter.para = ic->streams[re]->codecpar;
+    parameter.channels = ic->streams[re]->codecpar->channels;
+    parameter.sample_rate = ic->streams[re]->codecpar->sample_rate;
+
     return parameter;
 }
