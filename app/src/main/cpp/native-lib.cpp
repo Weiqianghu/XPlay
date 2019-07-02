@@ -7,6 +7,7 @@
 #include "XShader.h"
 #include "IVideoView.h"
 #include "GLVideoView.h"
+#include "FFResample.h"
 #include <android/native_window_jni.h>
 
 class DecodeObserver : public IObserver {
@@ -40,6 +41,10 @@ Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
 
     view = new GLVideoView();
     vdecode->AddObs(view);
+
+    IResample *resample = new FFResample();
+    resample->Open(demux->GetAParameter());
+    adecode->AddObs(resample);
 
     demux->Start();
     vdecode->Start();
