@@ -13,7 +13,10 @@ struct AVFrame;
 
 class FFDecode : public IDecode {
 public:
-    virtual bool Open(XParameter parameter);
+
+    static void InitHard(void *vm);
+
+    virtual bool Open(XParameter parameter, bool isHard = false);
 
     virtual bool SendPacket(XData xData);
 

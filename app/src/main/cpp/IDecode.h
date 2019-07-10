@@ -11,7 +11,7 @@
 
 class IDecode : public IObserver {
 public:
-    virtual bool Open(XParameter parameter) = 0;
+    virtual bool Open(XParameter parameter, bool isHard = false) = 0;
 
     virtual bool SendPacket(XData xData) = 0;
 

@@ -20,6 +20,13 @@ class DecodeObserver : public IObserver {
 
 IVideoView *view = nullptr;
 
+extern "C"
+JNIEXPORT
+jint JNI_OnLoad(JavaVM *vm, void *res) {
+    FFDecode::InitHard(vm);
+    return JNI_VERSION_1_4;
+}
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
         JNIEnv *env,
@@ -32,7 +39,7 @@ Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
     demux->Open("sdcard/1080.mp4");
 
     IDecode *vdecode = new FFDecode();
-    vdecode->Open(demux->GetVParameter());
+    vdecode->Open(demux->GetVParameter(), true);
     vdecode->AddObs(decodeObserver);
     demux->AddObs(vdecode);
 

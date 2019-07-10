@@ -7,19 +7,30 @@
 
 extern "C" {
 #include <libavcodec/avcodec.h>
+#include <libavcodec/jni.h>
 }
 
-bool FFDecode::Open(XParameter parameter) {
+void FFDecode::InitHard(void *vm) {
+    av_jni_set_java_vm(vm, nullptr);
+}
+
+bool FFDecode::Open(XParameter parameter, bool isHard) {
     if (parameter.para == nullptr) {
         return false;
     }
     AVCodecParameters *p = parameter.para;
-    AVCodec *cd = avcodec_find_decoder(p->codec_id);
+    AVCodec *cd = nullptr;
+    if (isHard) {
+        cd = avcodec_find_decoder_by_name("h264_mediacodec");
+    } else {
+        cd = avcodec_find_decoder(p->codec_id);
+    }
+
     if (!cd) {
-        XLOGE("avcodec_find_decoder %d failed", p->codec_id);
+        XLOGE("avcodec_find_decoder %d failed,isHard:%d", p->codec_id, isHard);
         return false;
     }
-    XLOGI("avcodec_find_decoder %d success", p->codec_id);
+    XLOGI("avcodec_find_decoder %d success,isHard:%d", p->codec_id, isHard);
 
     codec = avcodec_alloc_context3(cd);
     avcodec_parameters_to_context(codec, p);
@@ -69,9 +80,14 @@ XData FFDecode::RecvFrame() {
         data.width = frame->width;
         data.height = frame->height;
     } else if (codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+        data.isAudio = true;
         data.size = av_get_bytes_per_sample((AVSampleFormat) frame->format) * frame->nb_samples *
                     frame->channels;
     }
+    data.format = frame->format;
+    /*if (!data.isAudio) {
+        XLOGI("data format is %d", data.format);
+    }*/
     memcpy(data.datas, frame->data, sizeof(data.datas));
     return data;
 }
