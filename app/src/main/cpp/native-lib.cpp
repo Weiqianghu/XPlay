@@ -24,15 +24,6 @@ extern "C"
 JNIEXPORT
 jint JNI_OnLoad(JavaVM *vm, void *res) {
     FFDecode::InitHard(vm);
-    return JNI_VERSION_1_4;
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-
     DecodeObserver *decodeObserver = new DecodeObserver();
 
     IDemux *demux = new FFDemux();
@@ -64,8 +55,9 @@ Java_com_weiqianghu_xplay_MainActivity_stringFromJNI(
     vdecode->Start();
     adecode->Start();
 
-    return env->NewStringUTF(hello.c_str());
+    return JNI_VERSION_1_4;
 }
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_weiqianghu_xplay_XPlay_initView(JNIEnv *env, jobject instance, jobject surface) {
