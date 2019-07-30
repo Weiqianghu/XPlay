@@ -10,6 +10,7 @@
 #include "FFResample.h"
 #include "IAudioPlay.h"
 #include "SLAudioPlay.h"
+#include "IPlayer.h"
 #include <android/native_window_jni.h>
 
 class DecodeObserver : public IObserver {
@@ -27,15 +28,12 @@ jint JNI_OnLoad(JavaVM *vm, void *res) {
     DecodeObserver *decodeObserver = new DecodeObserver();
 
     IDemux *demux = new FFDemux();
-    demux->Open("sdcard/1080.mp4");
 
     IDecode *vdecode = new FFDecode();
-    vdecode->Open(demux->GetVParameter(), true);
     vdecode->AddObs(decodeObserver);
     demux->AddObs(vdecode);
 
     IDecode *adecode = new FFDecode();
-    adecode->Open(demux->GetAParameter());
     adecode->AddObs(decodeObserver);
     demux->AddObs(adecode);
 
@@ -43,17 +41,19 @@ jint JNI_OnLoad(JavaVM *vm, void *res) {
     vdecode->AddObs(view);
 
     IResample *resample = new FFResample();
-    XParameter outPara = demux->GetAParameter();
-    resample->Open(demux->GetAParameter(), outPara);
     adecode->AddObs(resample);
 
     IAudioPlay *audioPlay = new SLAudioPlay();
-    audioPlay->StartPlay(outPara);
     resample->AddObs(audioPlay);
 
-    demux->Start();
-    vdecode->Start();
-    adecode->Start();
+    IPlayer::Get()->demux = demux;
+    IPlayer::Get()->vdecode = vdecode;
+    IPlayer::Get()->adecode = adecode;
+    IPlayer::Get()->videoView = view;
+    IPlayer::Get()->resample = resample;
+    IPlayer::Get()->audioPlay = audioPlay;
+    IPlayer::Get()->Open("sdcard/1080.mp4");
+    IPlayer::Get()->Start();
 
     return JNI_VERSION_1_4;
 }
@@ -62,5 +62,5 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_weiqianghu_xplay_XPlay_initView(JNIEnv *env, jobject instance, jobject surface) {
     ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
-    view->SetRender(win);
+    IPlayer::Get()->InitView(win);
 }
