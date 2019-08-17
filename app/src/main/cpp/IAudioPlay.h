@@ -20,6 +20,8 @@ public:
 
     int maxFrame = 100;
 
+    int pts = 0;
+
 protected:
     std::list<XData> frames;
     std::mutex framesMutex;

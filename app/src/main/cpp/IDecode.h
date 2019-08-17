@@ -23,6 +23,10 @@ public:
 
     int maxList = 100;
 
+    int synPts = 0;
+
+    int pts = 0;
+
 protected:
     virtual void Main();
 

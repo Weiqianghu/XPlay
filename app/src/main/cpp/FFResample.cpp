@@ -53,6 +53,6 @@ XData FFResample::Resample(XData xData) {
         out.Drop();
         return XData();
     }
-
+    out.pts = xData.pts;
     return out;
 }

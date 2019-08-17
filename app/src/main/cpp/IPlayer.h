@@ -6,6 +6,7 @@
 #define XPLAY_IPLAYER_H
 
 
+#include <mutex>
 #include "XThread.h"
 #include "XParameter.h"
 
@@ -41,7 +42,11 @@ public:
     XParameter outPara;
 
 protected:
+    void Main();
+
     IPlayer();
+
+    std::mutex mutex;
 };
 
 

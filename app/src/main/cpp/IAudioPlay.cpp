@@ -13,6 +13,7 @@ XData IAudioPlay::GetData() {
         if (!frames.empty()) {
             data = frames.front();
             frames.pop_front();
+            pts = data.pts;
             framesMutex.unlock();
             return data;
         }
@@ -20,7 +21,6 @@ XData IAudioPlay::GetData() {
         XSleep(1);
         framesMutex.unlock();
     }
-
     return data;
 }
 

@@ -8,6 +8,10 @@ extern "C" {
 
 #include "FFDemux.h"
 
+static double r2d(AVRational r) {
+    return r.num == 0 || r.den == 0 ? 0 : (double) r.num / (double) r.den;
+}
+
 bool FFDemux::Open(const char *url) {
     XLOGD("start open");
     int re = avformat_open_input(&ic, url, nullptr, nullptr);
@@ -57,6 +61,13 @@ XData FFDemux::Read() {
         av_packet_free(&pkt);
         return XData();
     }
+
+    pkt->pts = static_cast<int64_t>(pkt->pts * r2d(ic->streams[pkt->stream_index]->time_base) *
+                                    1000);
+    pkt->dts = static_cast<int64_t>(pkt->dts * r2d(ic->streams[pkt->stream_index]->time_base) *
+                                    1000);
+    xData.pts = static_cast<int>(pkt->pts);
+//    XLOGE("demux pts %d,", xData.pts);
     return xData;
 }
 
