@@ -69,17 +69,21 @@ void SLAudioPlay::PlayCall(void *bufq) {
         return;
     }
     memcpy(buf, data.data, static_cast<size_t>(data.size));
-
+    mutex.lock();
     (*bf)->Enqueue(bf, buf, static_cast<SLuint32>(data.size));
     data.Drop();
+    mutex.unlock();
 }
 
 bool SLAudioPlay::StartPlay(XParameter out) {
+    Close();
+    mutex.lock();
     slEngineItf = createSL();
     if (slEngineItf) {
         XLOGE("createSL success");
     } else {
         XLOGE("createSL fail");
+        mutex.unlock();
         return false;
     }
 
@@ -87,12 +91,14 @@ bool SLAudioPlay::StartPlay(XParameter out) {
     SLresult sLresult = (*slEngineItf)->CreateOutputMix(slEngineItf, &mix, 0, nullptr, nullptr);
     if (sLresult != SL_RESULT_SUCCESS) {
         XLOGE("CreateOutputMix fail");
+        mutex.unlock();
         return false;
     }
 
     sLresult = (*mix)->Realize(mix, SL_BOOLEAN_FALSE);
     if (sLresult != SL_RESULT_SUCCESS) {
         XLOGE("Realize mix fail");
+        mutex.unlock();
         return false;
     }
     SLDataLocator_OutputMix outputMix = {SL_DATALOCATOR_OUTPUTMIX, mix};
@@ -116,17 +122,20 @@ bool SLAudioPlay::StartPlay(XParameter out) {
                                                  sizeof(ids) / sizeof(SLInterfaceID), ids, req);
     if (sLresult != SL_RESULT_SUCCESS) {
         XLOGE("CreateAudioPlayer fail");
+        mutex.unlock();
         return false;
     }
     (*player)->Realize(player, SL_BOOLEAN_FALSE);
     sLresult = (*player)->GetInterface(player, SL_IID_PLAY, &playerItf);
     if (sLresult != SL_RESULT_SUCCESS) {
         XLOGE("GetInterface player fail");
+        mutex.unlock();
         return false;
     }
     sLresult = (*player)->GetInterface(player, SL_IID_BUFFERQUEUE, &pcmQueue);
     if (sLresult != SL_RESULT_SUCCESS) {
         XLOGE("GetInterface SL_IID_BUFFERQUEUE fail");
+        mutex.unlock();
         return false;
     }
 
@@ -135,5 +144,26 @@ bool SLAudioPlay::StartPlay(XParameter out) {
 
     (*pcmQueue)->Enqueue(pcmQueue, "", 1);
     XLOGD("start play success");
+    mutex.unlock();
     return true;
+}
+
+void SLAudioPlay::Close() {
+    mutex.lock();
+    if (playerItf && (*playerItf)) {
+        (*playerItf)->SetPlayState(playerItf, SL_PLAYSTATE_STOPPED);
+    }
+    if (pcmQueue && (*pcmQueue)) {
+        (*pcmQueue)->Clear(pcmQueue);
+    }
+    if (player && (*player)) {
+        (*player)->Destroy(player);
+    }
+    if (mix && (*mix)) {
+        (*mix)->Destroy(mix);
+    }
+    if (objectItf && (*objectItf)) {
+        (*objectItf)->Destroy(objectItf);
+    }
+    mutex.unlock();
 }
