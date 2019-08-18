@@ -8,12 +8,15 @@
 
 #include "IDemux.h"
 #include "XLog.h"
+#include <mutex>
 
 struct AVFormatContext;
 
 class FFDemux : public IDemux {
 public:
     virtual bool Open(const char *url);
+
+    virtual void Close();
 
     virtual XParameter GetVParameter();
 
@@ -27,6 +30,7 @@ private:
     AVFormatContext *ic = 0;
     int audioStream = 1;
     int videoStream = 0;
+    std::mutex mutex;
 };
 
 
