@@ -18,6 +18,7 @@ bool FFDecode::Open(XParameter parameter, bool isHard) {
     if (parameter.para == nullptr) {
         return false;
     }
+    Close();
     AVCodecParameters *p = parameter.para;
     AVCodec *cd = nullptr;
     if (isHard) {
@@ -32,6 +33,7 @@ bool FFDecode::Open(XParameter parameter, bool isHard) {
     }
     XLOGI("avcodec_find_decoder %d success,isHard:%d", p->codec_id, isHard);
 
+    mutex.lock();
     codec = avcodec_alloc_context3(cd);
     avcodec_parameters_to_context(codec, p);
 
@@ -41,11 +43,26 @@ bool FFDecode::Open(XParameter parameter, bool isHard) {
         char buf[1024] = {0};
         av_strerror(re, buf, sizeof(buf) - 1);
         XLOGE("avcodec_open2 failed because : %s", buf);
+        mutex.unlock();
         return false;
     }
     this->isAudio = codec->codec_type == AVMEDIA_TYPE_AUDIO;
     XLOGI("avcodec_open2 success");
+    mutex.unlock();
     return true;
+}
+
+void FFDecode::Close() {
+    mutex.lock();
+    pts = 0;
+    if (frame) {
+        av_frame_free(&frame);
+    }
+    if (codec) {
+        avcodec_close(codec);
+        avcodec_free_context(&codec);
+    }
+    mutex.unlock();
 }
 
 bool FFDecode::SendPacket(XData pkt) {
@@ -53,16 +70,21 @@ bool FFDecode::SendPacket(XData pkt) {
         return false;
     }
 
+    mutex.lock();
     if (!codec) {
+        mutex.unlock();
         return false;
     }
 
     int re = avcodec_send_packet(codec, reinterpret_cast<const AVPacket *>(pkt.data));
+    mutex.unlock();
     return re == 0;
 }
 
 XData FFDecode::RecvFrame() {
+    mutex.lock();
     if (!codec) {
+        mutex.unlock();
         return XData();
     }
     if (!frame) {
@@ -70,6 +92,7 @@ XData FFDecode::RecvFrame() {
     }
     int re = avcodec_receive_frame(codec, frame);
     if (re != 0) {
+        mutex.unlock();
         return XData();
     }
 
@@ -89,6 +112,8 @@ XData FFDecode::RecvFrame() {
         XLOGI("data format is %d", data.format);
     }*/
     data.pts = frame->pts;
+    pts = data.pts;
     memcpy(data.datas, frame->data, sizeof(data.datas));
+    mutex.unlock();
     return data;
 }

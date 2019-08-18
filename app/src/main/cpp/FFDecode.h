@@ -18,6 +18,8 @@ public:
 
     virtual bool Open(XParameter parameter, bool isHard = false);
 
+    virtual void Close();
+
     virtual bool SendPacket(XData xData);
 
     virtual XData RecvFrame();
@@ -25,6 +27,7 @@ public:
 protected:
     AVCodecContext *codec = 0;
     AVFrame *frame = nullptr;
+    std::mutex mutex;
 };
 
 

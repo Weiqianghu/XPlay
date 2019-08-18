@@ -16,6 +16,8 @@ class IDemux : public IObserver {
 public:
     virtual bool Open(const char *url) = 0;
 
+    virtual void Close() = 0;
+
     virtual XParameter GetVParameter() = 0;
 
     virtual XParameter GetAParameter() = 0;

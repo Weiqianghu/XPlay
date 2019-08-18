@@ -13,6 +13,8 @@ class IDecode : public IObserver {
 public:
     virtual bool Open(XParameter parameter, bool isHard = false) = 0;
 
+    virtual void Close() = 0;
+
     virtual bool SendPacket(XData xData) = 0;
 
     virtual XData RecvFrame() = 0;
